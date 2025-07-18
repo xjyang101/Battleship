@@ -12,7 +12,7 @@ const fleet = {
   carrier: 5
 }
 
-const ships = Object.entries(fleet).reduce((acc, [key, value]) => {
+let ships = Object.entries(fleet).reduce((acc, [key, value]) => {
   return {
     ...acc,
     [key]: {
@@ -30,7 +30,7 @@ let shipNames = Object.keys(ships);
 function createBoardSize() {
   while(true) {
     const boardSizeInput = rs.question('Input board size (I.E -> "5" for a 5x5 board) => ');
-    if(boardSizeInput > 0 && boardSizeInput < 50) {
+    if(boardSizeInput >= 5 && boardSizeInput <= 10) {
       boardSize = parseInt(boardSizeInput);
       break;
     } else {
@@ -53,27 +53,53 @@ function displayBoard2() {
 
 
 function placeShips(board) {
-  for(let i = 0; i < shipNames.length; i++) {
-      let row, col, direction;
-      let length = ships[shipNames[i]].length;
+  const sortedShipNames = shipNames.sort((a,b) => ships[b].length - ships[a].length);
 
-      do {
-          direction = Math.floor(Math.random() * 2);
-          row = Math.floor(Math.random() * boardSize);
-          col = Math.floor(Math.random() * boardSize);
-      } while(!isValidPlacement(board,  row, col, length, direction ));
+  for (let i = 0; i < sortedShipNames.length; i++) {
+    let row, col, direction;
+    let length = ships[sortedShipNames[i]].length;
+    let retries = 0;
+    const maxRetries = 100;
 
-      for (let j = 0; j < length; j++) {
-          if (direction === 0) {
-            board[row][col + j] = true;
-            ships[shipNames[i]].position.push([row, col + j]);
-          } else {
-            board[row + j][col] = true;
-            ships[shipNames[i]].position.push([row + j, col]);
+    do {
+      if(retries > maxRetries) {
+        console.log(`Cannot place ${sortedShipNames[i]} on a ${boardSize}x${boardSize} board. Restarting placement.`)
+        board = createBoard();
+        ships = Object.entries(fleet).reduce((acc, [key, value]) => {
+          return {
+            ...acc, 
+            [key]: {
+              name: key,
+              length: value,
+              position: [],
+              hits: 0
+            }
           }
+        }, {});
+        i = -1; 
+        retries = 0;
+        continue
       }
-  } 
+
+      direction = Math.floor(Math.random() * 2);
+      row = Math.floor(Math.random() * boardSize)
+      col = Math.floor(Math.random() * boardSize);
+      retries++
+    } while (!isValidPlacement(board,row,col,length, direction));
+
+    for (let j = 0; j < length; j++) {
+      if (direction === 0) {
+        board[row][col + j] = true;
+        ships[sortedShipNames[i]].position.push([row, col + j]);
+      } else {
+        board[row + j][col] = true;
+        ships[sortedShipNames[i]].position.push([row + j, col]);
+
+      }
+    }
+  }
 }
+
 
 function isValidPlacement(board, startRow, startCol, length, direction) {
   const condition = (direction === 0 && startCol + length > boardSize) ||
@@ -170,9 +196,18 @@ function endOfGame() {
        board = [];
        shipsRemaining = 5;
        pastAttacks = [];
-       shipNames = Object.keys(ships);
-       Object.values(ships).map((ship) => ship.position = []);
-       Object.values(ships).map((ship) => ship.hits = 0)
+       ships = Object.entries(fleet).reduce((acc, [key, value]) => {
+        return {
+          ...acc,
+          [key]: {
+            name: key,
+            length: value,
+            position: [],
+            hits: 0
+          }
+        }
+      }, {});
+      shipNames = Object.keys(ships);
       break;
     } else if (restartGame.toUpperCase() === 'N') {
       process.exit();

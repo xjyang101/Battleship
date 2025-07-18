@@ -1,0 +1,25 @@
+{
+  "name": "battleship-assignment",
+  "version": "1.0.0",
+  "description": "Part 4 is organized in separate modules",
+  "main": "part-1.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start-game": "node part-2.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xjyang101/Battleship-Assignment.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/xjyang101/Battleship-Assignment/issues"
+  },
+  "homepage": "https://github.com/xjyang101/Battleship-Assignment#readme",
+  "dependencies": {
+    "readline-sync": "^1.4.10"
+  },
+  "devDependencies": {}
+}
